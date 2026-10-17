@@ -567,7 +567,21 @@
             const db = await initDB();
             const tx = db.transaction(STORE_NAME, 'readwrite');
             const store = tx.objectStore(STORE_NAME);
-            trackObjects.forEach(track => store.put(track));
+            
+            // File 객체 그대로 대신 ArrayBuffer 바이너리로 읽어 저장하여 크롬 PWA 및 모든 모바일 브라우저 재실행 시 스트림 손실 방지
+            for (const track of trackObjects) {
+                let buffer = track.buffer;
+                if (!buffer && track.file) {
+                    buffer = await track.file.arrayBuffer();
+                }
+                store.put({
+                    id: track.id,
+                    name: track.name,
+                    type: track.file ? track.file.type : (track.type || 'audio/mpeg'),
+                    buffer: buffer
+                });
+            }
+            
             return new Promise((resolve, reject) => {
                 tx.oncomplete = () => resolve();
                 tx.onerror = () => reject(tx.error);
@@ -758,13 +772,13 @@
             updatePlayPauseUI();
         }
 
-        function parseMetadata(file) {
+        function parseMetadata(fileOrBlob) {
             if (!window.jsmediatags) {
                 DOM.lyricsContent.innerHTML = '<p class="text-gray-500">메타데이터 파서를 불러올 수 없습니다.</p>';
                 return;
             }
             
-            window.jsmediatags.read(file, {
+            window.jsmediatags.read(fileOrBlob, {
                 onSuccess: function(tag) {
                     const tags = tag.tags;
                     
@@ -884,7 +898,22 @@
             
             if (state.audio.src) URL.revokeObjectURL(state.audio.src);
             
-            const objectUrl = URL.createObjectURL(track.file);
+            // ArrayBuffer 데이터가 있는 경우 Blob으로 변환하여 오디오 소스 생성 (크롬 PWA 재접속 안전 보장)
+            let audioBlob;
+            if (track.buffer) {
+                audioBlob = new Blob([track.buffer], { type: track.type || 'audio/mpeg' });
+            } else if (track.file) {
+                audioBlob = track.file;
+            }
+
+            if (!audioBlob) {
+                DOM.songTitle.textContent = formatFileName(track.name);
+                DOM.songArtist.textContent = "오디오 데이터 없음";
+                showToast("음악 데이터를 읽을 수 없습니다");
+                return;
+            }
+
+            const objectUrl = URL.createObjectURL(audioBlob);
             state.audio.src = objectUrl;
             state.audio.load();
             
@@ -896,7 +925,7 @@
             state.parsedLyrics = [];
             state.lastLyricIndex = -1;
             
-            parseMetadata(track.file);
+            parseMetadata(audioBlob);
             DOM.progressBar.disabled = false;
             updatePlaylistUI();
             
@@ -1164,11 +1193,18 @@
             if (files.length === 0) return;
 
             const wasEmpty = state.playlist.length === 0;
-            const newTracks = files.map(file => ({
-                id: Date.now() + '_' + Math.random().toString(36).substring(2, 9) + '_' + file.name,
-                name: file.name,
-                file: file
-            }));
+            const newTracks = [];
+
+            for (const file of files) {
+                const buffer = await file.arrayBuffer();
+                newTracks.push({
+                    id: Date.now() + '_' + Math.random().toString(36).substring(2, 9) + '_' + file.name,
+                    name: file.name,
+                    type: file.type || 'audio/mpeg',
+                    buffer: buffer,
+                    file: file
+                });
+            }
 
             state.playlist = [...state.playlist, ...newTracks];
             
