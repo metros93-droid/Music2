@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2306b6d4'/><stop offset='50%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient></defs><rect width='512' height='512' rx='120' fill='%23070913'/><rect x='16' y='16' width='480' height='480' rx='108' fill='url(%23bg)' opacity='0.15'/><path d='M192 144 L368 256 L192 368 Z' fill='url(%23bg)'/><circle cx='380' cy='140' r='12' fill='%2322d3ee'/><circle cx='130' cy='370' r='16' fill='%23e879f9'/></svg>">
     <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22모바일%20뮤직%20플레이어%22,%22short_name%22:%22뮤직플레이어%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%23070913%22,%22theme_color%22:%22%23070913%22}">
     
-    <title>TeD's music</title>
+    <title>모바일 뮤직 플레이어</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -131,7 +131,7 @@
                 <i class="fas fa-mobile-screen-button text-base"></i>
             </button>
         </div>
-        <span class="text-[11px] font-bold tracking-widest text-cyan-400/80 uppercase">TeD' music</span>
+        <span class="text-[11px] font-bold tracking-widest text-cyan-400/80 uppercase">Now Playing</span>
         <button id="btnTogglePlaylist" class="text-gray-300 hover:text-white transition-all p-2 rounded-full backdrop-blur-md bg-white/5 border border-white/10 hover:border-cyan-500/50 relative">
             <i class="fas fa-list-ul text-base"></i>
             <span id="playlistBadge" class="absolute -top-1 -right-1 bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold hidden shadow-lg shadow-cyan-500/50">0</span>
@@ -276,7 +276,6 @@
     </div>
 
     <script>
-        // --- State Management ---
         const state = {
             playlist: [],
             currentIndex: -1,
@@ -288,10 +287,10 @@
             parsedLyrics: [],
             pendingSeekTime: 0,
             userInitiatedPause: false,
-            wasInterruptedBySystem: false // 시스템(통화/타 앱)에 의해 중단되었는지 여부
+            wasInterruptedBySystem: false
         };
 
-        // --- Silent Audio Keeper (WebAudio Loop for OS Background Prevention) ---
+        // --- PWA Auto-next & Background Playback Handler ---
         let audioCtx = null;
         let silentInterval = null;
 
@@ -316,7 +315,7 @@
                             osc.stop(audioCtx.currentTime + 0.05);
                         } catch (e) {}
                     }
-                }, 10000);
+                }, 5000); // 5초 간격으로 세션 활성 유지
             }
         }
 
@@ -326,6 +325,18 @@
                 silentInterval = null;
             }
         }
+
+        // PWA 백그라운드 전환 시 세션 유지 보강
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                if (audioCtx && audioCtx.state === 'suspended' && state.isPlaying) {
+                    audioCtx.resume();
+                }
+                if (state.isPlaying && state.audio.paused && !state.userInitiatedPause) {
+                    state.audio.play().catch(() => {});
+                }
+            }
+        });
 
         const DOM = {
             fileInput: document.getElementById('fileInput'),
@@ -434,30 +445,6 @@
             }
         });
 
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        document.body.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, { passive: true });
-
-        document.body.addEventListener('touchend', (e) => {
-            const touchEndX = e.changedTouches[0].screenX;
-            const touchEndY = e.changedTouches[0].screenY;
-            const diffX = touchEndX - touchStartX;
-            const diffY = touchEndY - touchStartY;
-
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-                const isPlaylistOpen = DOM.playlistView.classList.contains('playlist-open');
-                if (diffX < 0 && !isPlaylistOpen) {
-                    togglePlaylist(true);
-                } else if (diffX > 0 && isPlaylistOpen) {
-                    togglePlaylist(false);
-                }
-            }
-        }, { passive: true });
-
         function initMediaSession() {
             if (!('mediaSession' in navigator)) return;
 
@@ -552,6 +539,7 @@
             }
         }
 
+        // --- IndexedDB Management ---
         const DB_NAME = 'MobileMusicPlayerDB';
         const DB_VERSION = 1;
         const STORE_NAME = 'playlist_tracks';
@@ -917,20 +905,41 @@
 
         function playTrack(index = null) {
             if (state.playlist.length === 0) return;
-            if (index !== null && index !== state.currentIndex) loadTrack(index, false);
-            else if (state.currentIndex === -1) loadTrack(0, false);
+            if (index !== null && index !== state.currentIndex) {
+                loadTrack(index, true);
+                return;
+            } else if (state.currentIndex === -1) {
+                loadTrack(0, true);
+                return;
+            }
             
             state.userInitiatedPause = false;
             startSilentKeepAlive();
 
-            state.audio.play().then(() => {
-                state.isPlaying = true;
-                updatePlayPauseUI();
-            }).catch((err) => {
-                console.warn("Playback prevented:", err);
-                state.isPlaying = false;
-                updatePlayPauseUI();
-            });
+            // PWA 재생 정책 차단 해제를 위해 AudioContext 활성화
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const playPromise = state.audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    state.isPlaying = true;
+                    updatePlayPauseUI();
+                }).catch((err) => {
+                    console.warn("Playback prevented, retrying with silent keepalive:", err);
+                    // PWA 오디오 인터랙션 제한 우회를 위한 재시도
+                    setTimeout(() => {
+                        state.audio.play().then(() => {
+                            state.isPlaying = true;
+                            updatePlayPauseUI();
+                        }).catch(e => {
+                            state.isPlaying = false;
+                            updatePlayPauseUI();
+                        });
+                    }, 100);
+                });
+            }
         }
 
         function pauseTrack() {
@@ -1013,7 +1022,6 @@
         });
 
         state.audio.addEventListener('pause', () => {
-            // 사용자가 직접 일시정지를 누르지 않았는데 일시정지된 경우 (통화 / 타 앱 오디오 점유)
             if (!state.userInitiatedPause && state.isPlaying) {
                 state.wasInterruptedBySystem = true;
                 state.isPlaying = false;
@@ -1024,22 +1032,19 @@
             }
         });
 
-        // 타 앱 오디오 점유가 끝나거나 오디오 드라이버 세션이 복원될 때 호출되는 방어 로직
         function handleAudioInterruptionResume() {
             if (state.wasInterruptedBySystem && !state.userInitiatedPause && state.currentIndex >= 0) {
-                // 오디오 드라이버 사용이 가능해졌을 때 자동 재개 시도
                 state.audio.play().then(() => {
                     state.isPlaying = true;
                     state.wasInterruptedBySystem = false;
                     updatePlayPauseUI();
-                    showToast("통화/오디오 종료 후 재생 재개됨");
+                    showToast("오디오 재생 재개됨");
                 }).catch((e) => {
                     console.log("자동 재개 대기 중:", e);
                 });
             }
         }
 
-        // 오디오 장치 변경(이어폰 분리/연결, 통화 종료 후 디바이스 변경) 및 복구 감지
         if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
             navigator.mediaDevices.addEventListener('devicechange', () => {
                 setTimeout(handleAudioInterruptionResume, 1000);
@@ -1076,7 +1081,9 @@
             updateLyricsHighlight(state.audio.currentTime);
         });
 
+        // PWA 자동 연속 재생 버그의 핵심 수정 위치
         state.audio.addEventListener('ended', () => {
+            state.userInitiatedPause = false;
             if (state.repeatMode === 2) {
                 state.audio.currentTime = 0;
                 playTrack(state.currentIndex);
@@ -1084,7 +1091,10 @@
                 pauseTrack();
                 state.audio.currentTime = 0;
             } else {
-                nextTrack();
+                // 백그라운드 PWA Autoplay 방어: 즉시 nextTrack 호출
+                setTimeout(() => {
+                    nextTrack();
+                }, 50);
             }
         });
 
@@ -1232,64 +1242,42 @@
 
         DOM.btnClearPlaylistBtn.addEventListener('click', showConfirmModal);
         DOM.btnCancelClear.addEventListener('click', hideConfirmModal);
-        
+
         DOM.btnConfirmClear.addEventListener('click', async () => {
-            hideConfirmModal();
-            state.playlist = [];
-            await clearTracksDB();
-            
             pauseTrack();
-            state.audio.src = '';
+            state.playlist = [];
             state.currentIndex = -1;
+            await clearTracksDB();
             saveSettings();
             resetUI();
             updatePlaylistUI();
-            showToast("플레이리스트가 초기화되었습니다");
+            hideConfirmModal();
+            showToast("플레이리스트를 비웠습니다");
         });
 
         window.addEventListener('DOMContentLoaded', async () => {
             initMediaSession();
+            loadSettings();
+
             try {
-                loadSettings();
                 const storedTracks = await loadTracksFromDB();
-                
                 if (storedTracks && storedTracks.length > 0) {
                     state.playlist = storedTracks;
                     updatePlaylistUI();
-                    
+
                     if (state.currentIndex >= 0 && state.currentIndex < state.playlist.length) {
-                        const savedTime = state.pendingSeekTime;
-                        loadTrack(state.currentIndex, false, savedTime);
-                        DOM.songArtist.textContent = "Offline Library (재개 대기중)";
-                    } else {
-                        state.currentIndex = -1;
-                        resetUI();
+                        loadTrack(state.currentIndex, false, state.pendingSeekTime);
+                    } else if (state.playlist.length > 0) {
+                        loadTrack(0, false, 0);
                     }
                 } else {
                     updatePlaylistUI();
                 }
-            } catch (error) {
-                console.error("Initialization error:", error);
-                DOM.loadingIndicator.innerHTML = '<p class="text-rose-400 text-xs">데이터를 불러오는 데 실패했습니다.</p>';
+            } catch (err) {
+                console.error("Failed to load tracks from IndexedDB:", err);
+                updatePlaylistUI();
             }
         });
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                saveSettings();
-            } else if (document.visibilityState === 'visible') {
-                // 통화나 타 앱 이용 후 앱으로 돌아왔을 때 오디오 세션 자동 복구
-                if (state.wasInterruptedBySystem || (state.isPlaying && state.audio.paused && !state.userInitiatedPause)) {
-                    handleAudioInterruptionResume();
-                }
-            }
-        });
-
-        window.addEventListener('focus', () => {
-            handleAudioInterruptionResume();
-        });
-
-        window.addEventListener('beforeunload', saveSettings);
     </script>
 </body>
 </html>
