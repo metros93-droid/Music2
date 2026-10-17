@@ -4,17 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#070913">
+    
+    <!-- Fullscreen & PWA display options for mobile browsers (Samsung Internet, Chrome, Safari) -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="뮤직 플레이어">
+    <meta name="apple-mobile-web-app-title" content="TeD music">
+    <meta name="display" content="fullscreen">
     
     <!-- Neon Gradient App Icon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2306b6d4'/><stop offset='50%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient></defs><rect width='512' height='512' rx='120' fill='%23070913'/><rect x='16' y='16' width='480' height='480' rx='108' fill='url(%23bg)' opacity='0.15'/><path d='M192 144 L368 256 L192 368 Z' fill='url(%23bg)'/><circle cx='380' cy='140' r='12' fill='%2322d3ee'/><circle cx='130' cy='370' r='16' fill='%23e879f9'/></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2306b6d4'/><stop offset='50%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient></defs><rect width='512' height='512' rx='120' fill='%23070913'/><rect x='16' y='16' width='480' height='480' rx='108' fill='url(%23bg)' opacity='0.15'/><path d='M192 144 L368 256 L192 368 Z' fill='url(%23bg)'/><circle cx='380' cy='140' r='12' fill='%2322d3ee'/><circle cx='130' cy='370' r='16' fill='%23e879f9'/></svg>">
-    <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22모바일%20뮤직%20플레이어%22,%22short_name%22:%22뮤직플레이어%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%23070913%22,%22theme_color%22:%22%23070913%22}">
+    <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22TeD%20music%22,%22short_name%22:%22TeD%20music%22,%22start_url%22:%22./%22,%22display%22:%22fullscreen%22,%22orientation%22:%22portrait%22,%22background_color%22:%22%23070913%22,%22theme_color%22:%22%23070913%22}">
     
-    <title>모바일 뮤직 플레이어</title>
+    <title>TeD music v1.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,6 +37,7 @@
             -webkit-user-select: none;
         }
 
+        /* Lock viewport bounds to 100% of visible viewport and dynamic height */
         body {
             position: fixed;
             top: 0;
@@ -44,6 +48,7 @@
             height: 100dvh;
         }
 
+        /* Custom Styles for Slider */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
@@ -70,6 +75,7 @@
             outline: none;
         }
         
+        /* Disc Animation & Neon Ring */
         @keyframes spin-slow {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -92,17 +98,29 @@
             box-shadow: 0 0 40px rgba(6, 182, 212, 0.6), 0 0 70px rgba(236, 72, 153, 0.5);
         }
 
-        .playlist-open { transform: translateX(0%); }
-        .playlist-closed { transform: translateX(100%); }
+        /* Playlist Overlay Transition (Right to Left Slide) */
+        .playlist-open {
+            transform: translateX(0%);
+        }
+        .playlist-closed {
+            transform: translateX(100%);
+        }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Hide scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
         .mask-image-y {
             -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
             mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
         }
 
+        /* Lyrics Highlight Styles */
         .lyric-line { 
             transition: all 0.3s ease; 
             transform-origin: center;
@@ -131,7 +149,7 @@
                 <i class="fas fa-mobile-screen-button text-base"></i>
             </button>
         </div>
-        <span class="text-[11px] font-bold tracking-widest text-cyan-400/80">TeD Playing</span>
+        <span class="text-[12px] font-bold tracking-wider text-cyan-400/90 normal-case">TeD music v1.0</span>
         <button id="btnTogglePlaylist" class="text-gray-300 hover:text-white transition-all p-2 rounded-full backdrop-blur-md bg-white/5 border border-white/10 hover:border-cyan-500/50 relative">
             <i class="fas fa-list-ul text-base"></i>
             <span id="playlistBadge" class="absolute -top-1 -right-1 bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold hidden shadow-lg shadow-cyan-500/50">0</span>
@@ -141,14 +159,17 @@
     <!-- Hidden File Input -->
     <input type="file" id="fileInput" multiple accept="audio/*" class="hidden">
 
+    <!-- Main Content Area -->
     <main class="flex-1 flex flex-col items-center justify-evenly px-6 w-full min-h-0 relative z-10 overflow-hidden py-1">
         
         <!-- Visual Area (Vinyl + Gradient Neon Ring) -->
-        <div class="relative w-full flex-1 max-h-[250px] flex items-center justify-center my-auto">
+        <div class="relative w-full flex-1 max-h-[320px] flex items-center justify-center my-auto">
             <div id="neonRing" class="neon-ring-outer w-full max-w-[190px] aspect-square">
                 <div class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center p-1 border border-white/10 cursor-pointer shadow-2xl relative" id="discContainer">
                     <div id="vinylDisc" class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center paused-spin relative overflow-hidden">
+                        <!-- Album Cover Image -->
                         <img id="albumCover" src="" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 z-10" alt="Album Cover" style="display: none;">
+                        <!-- Default Vinyl Grooves -->
                         <div class="w-full h-full rounded-full border border-white/5 flex items-center justify-center">
                             <div class="w-3/4 h-3/4 rounded-full border border-white/5 flex items-center justify-center">
                                 <div class="w-1/2 h-1/2 rounded-full border border-white/10 bg-cyan-500/10 flex items-center justify-center">
@@ -160,10 +181,10 @@
                 </div>
             </div>
 
-            <!-- Rectangular Lyrics Overlay -->
-            <div id="inlineLyricsView" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[92%] h-[220px] bg-slate-950/80 backdrop-blur-md rounded-3xl z-30 flex flex-col hidden opacity-0 transition-opacity duration-300 overflow-hidden shadow-2xl border border-white/10 cursor-pointer">
+            <!-- Rectangular Lyrics Overlay (파란 네모 영역 전체 크기로 확장) -->
+            <div id="inlineLyricsView" class="absolute inset-0 w-full h-full bg-slate-950/40 backdrop-blur-xs rounded-3xl z-30 flex flex-col hidden opacity-0 transition-opacity duration-300 overflow-hidden shadow-2xl border border-white/20 cursor-pointer">
                 <div id="lyricsScroll" class="w-full h-full overflow-y-auto no-scrollbar relative px-4 mask-image-y pointer-events-auto">
-                    <div id="lyricsContent" class="text-center text-gray-200 text-sm sm:text-base py-[90px] relative font-medium">
+                    <div id="lyricsContent" class="text-center text-gray-200 text-sm sm:text-base py-[110px] relative font-medium">
                         가사 정보를 불러오는 중입니다...
                     </div>
                 </div>
@@ -186,6 +207,7 @@
         </div>
     </main>
 
+    <!-- Controls Area (Always Visible at Bottom) -->
     <div id="playerControls" class="flex justify-between items-center w-full px-6 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 z-50 flex-shrink-0 bg-[#070913]">
         <button id="btnShuffle" class="text-gray-500 transition-colors p-2 focus:outline-none" title="셔플">
             <i class="fas fa-random text-sm"></i>
@@ -225,6 +247,7 @@
         </ul>
     </div>
 
+    <!-- Backdrop for playlist -->
     <div id="playlistBackdrop" class="absolute inset-0 bg-black/60 z-30 hidden transition-opacity opacity-0 backdrop-blur-sm pointer-events-none"></div>
 
     <!-- Install Modal -->
@@ -255,7 +278,7 @@
         </div>
     </div>
 
-    <!-- Confirm Modal -->
+    <!-- Custom Confirm Modal -->
     <div id="confirmModal" class="absolute inset-0 bg-black/80 z-50 hidden items-center justify-center backdrop-blur-sm opacity-0 transition-opacity">
         <div class="bg-slate-900 p-5 rounded-2xl w-[82%] max-w-xs text-center shadow-2xl border border-white/10 transform scale-95 transition-transform" id="confirmModalBox">
             <div class="text-rose-400 mb-2.5 text-2xl">
@@ -276,6 +299,7 @@
     </div>
 
     <script>
+        // --- State Management ---
         const state = {
             playlist: [],
             currentIndex: -1,
@@ -285,59 +309,10 @@
             repeatMode: 0,
             isDragging: false,
             parsedLyrics: [],
-            pendingSeekTime: 0,
-            userInitiatedPause: false,
-            wasInterruptedBySystem: false
+            pendingSeekTime: 0
         };
 
-        // --- PWA Auto-next & Background Playback Handler ---
-        let audioCtx = null;
-        let silentInterval = null;
-
-        function startSilentKeepAlive() {
-            if (!audioCtx) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) audioCtx = new AudioContext();
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            if (!silentInterval) {
-                silentInterval = setInterval(() => {
-                    if (state.isPlaying && audioCtx) {
-                        try {
-                            const osc = audioCtx.createOscillator();
-                            const gain = audioCtx.createGain();
-                            gain.gain.value = 0.00001; // Pure Silence
-                            osc.connect(gain);
-                            gain.connect(audioCtx.destination);
-                            osc.start();
-                            osc.stop(audioCtx.currentTime + 0.05);
-                        } catch (e) {}
-                    }
-                }, 5000); // 5초 간격으로 세션 활성 유지
-            }
-        }
-
-        function stopSilentKeepAlive() {
-            if (silentInterval) {
-                clearInterval(silentInterval);
-                silentInterval = null;
-            }
-        }
-
-        // PWA 백그라운드 전환 시 세션 유지 보강
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                if (audioCtx && audioCtx.state === 'suspended' && state.isPlaying) {
-                    audioCtx.resume();
-                }
-                if (state.isPlaying && state.audio.paused && !state.userInitiatedPause) {
-                    state.audio.play().catch(() => {});
-                }
-            }
-        });
-
+        // --- DOM Elements ---
         const DOM = {
             fileInput: document.getElementById('fileInput'),
             btnLoadMusic: document.getElementById('btnLoadMusic'),
@@ -445,22 +420,38 @@
             }
         });
 
+        // --- Touch Gestures ---
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.body.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        document.body.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                const isPlaylistOpen = DOM.playlistView.classList.contains('playlist-open');
+                if (diffX < 0 && !isPlaylistOpen) {
+                    togglePlaylist(true);
+                } else if (diffX > 0 && isPlaylistOpen) {
+                    togglePlaylist(false);
+                }
+            }
+        }, { passive: true });
+
+        // --- Media Session API ---
         function initMediaSession() {
             if (!('mediaSession' in navigator)) return;
 
             const actionHandlers = [
-                ['play', () => { 
-                    state.userInitiatedPause = false; 
-                    state.wasInterruptedBySystem = false;
-                    playTrack(); 
-                    showToast("재생"); 
-                }],
-                ['pause', () => { 
-                    state.userInitiatedPause = true; 
-                    state.wasInterruptedBySystem = false;
-                    pauseTrack(); 
-                    showToast("일시정지"); 
-                }],
+                ['play', () => { playTrack(); showToast("재생"); }],
+                ['pause', () => { pauseTrack(); showToast("일시정지"); }],
                 ['previoustrack', () => { prevTrack(); }],
                 ['nexttrack', () => { nextTrack(); }],
                 ['seekbackward', (details) => {
@@ -491,10 +482,10 @@
             if (!('mediaSession' in navigator)) return;
 
             const currentTrack = state.currentIndex >= 0 ? state.playlist[state.currentIndex] : null;
-            const title = currentTrack ? formatFileName(currentTrack.name) : '모바일 뮤직 플레이어';
+            const title = currentTrack ? formatFileName(currentTrack.name) : 'TeD music';
             const artist = (currentTrack && DOM.songArtist.textContent && DOM.songArtist.textContent !== '기기의 폴더에서 노래를 불러오세요') 
                 ? DOM.songArtist.textContent 
-                : '모바일 플레이어';
+                : 'TeD music';
 
             let artworkUrl = DOM.albumCover.src;
             if (!artworkUrl || DOM.albumCover.style.display === 'none') {
@@ -505,7 +496,7 @@
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: title,
                     artist: artist,
-                    album: '내 플레이리스트',
+                    album: 'TeD music Playlist',
                     artwork: [
                         { src: artworkUrl, sizes: '96x96', type: 'image/png' },
                         { src: artworkUrl, sizes: '128x128', type: 'image/png' },
@@ -539,8 +530,8 @@
             }
         }
 
-        // --- IndexedDB Management ---
-        const DB_NAME = 'MobileMusicPlayerDB';
+        // --- IndexedDB Persistence ---
+        const DB_NAME = 'TeDMusicPlayerDB';
         const DB_VERSION = 1;
         const STORE_NAME = 'playlist_tracks';
         let dbInstance = null;
@@ -567,21 +558,7 @@
             const db = await initDB();
             const tx = db.transaction(STORE_NAME, 'readwrite');
             const store = tx.objectStore(STORE_NAME);
-            
-            // File 객체 그대로 대신 ArrayBuffer 바이너리로 읽어 저장하여 크롬 PWA 및 모든 모바일 브라우저 재실행 시 스트림 손실 방지
-            for (const track of trackObjects) {
-                let buffer = track.buffer;
-                if (!buffer && track.file) {
-                    buffer = await track.file.arrayBuffer();
-                }
-                store.put({
-                    id: track.id,
-                    name: track.name,
-                    type: track.file ? track.file.type : (track.type || 'audio/mpeg'),
-                    buffer: buffer
-                });
-            }
-            
+            trackObjects.forEach(track => store.put(track));
             return new Promise((resolve, reject) => {
                 tx.oncomplete = () => resolve();
                 tx.onerror = () => reject(tx.error);
@@ -611,6 +588,7 @@
             });
         }
 
+        // --- Settings Management ---
         function saveSettings() {
             const settings = {
                 currentIndex: state.currentIndex,
@@ -618,11 +596,11 @@
                 repeatMode: state.repeatMode,
                 currentTime: state.audio ? state.audio.currentTime : 0
             };
-            localStorage.setItem('musicPlayerSettings', JSON.stringify(settings));
+            localStorage.setItem('tedMusicSettings', JSON.stringify(settings));
         }
 
         function loadSettings() {
-            const saved = localStorage.getItem('musicPlayerSettings');
+            const saved = localStorage.getItem('tedMusicSettings');
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
@@ -667,6 +645,7 @@
             return filename.replace(/\.[^/.]+$/, "");
         }
 
+        // --- UI Updates ---
         function updatePlaylistUI() {
             DOM.playlistCount.textContent = state.playlist.length;
             
@@ -693,6 +672,7 @@
             state.playlist.forEach((track, index) => {
                 const isActive = index === state.currentIndex;
                 const li = document.createElement('li');
+                li.id = `playlist-item-${index}`;
                 li.className = `flex items-center justify-between p-2.5 mb-2 rounded-xl cursor-pointer transition-colors ${isActive ? 'bg-cyan-500/10 border border-cyan-500/30' : 'hover:bg-slate-900/60'}`;
                 
                 li.innerHTML = `
@@ -711,7 +691,6 @@
                 
                 li.addEventListener('click', (e) => {
                     if(!e.target.closest('.delete-btn')) {
-                        state.userInitiatedPause = false;
                         playTrack(index);
                         togglePlaylist(false);
                     }
@@ -725,6 +704,27 @@
 
                 DOM.playlistContainer.appendChild(li);
             });
+        }
+
+        // --- Scroll to Current Active Song in Playlist ---
+        function scrollToCurrentTrack() {
+            if (state.currentIndex < 0 || state.playlist.length === 0) return;
+            
+            const activeItem = document.getElementById(`playlist-item-${state.currentIndex}`);
+            const container = DOM.playlistContainer;
+            
+            if (activeItem && container) {
+                const containerHeight = container.clientHeight;
+                const itemTop = activeItem.offsetTop;
+                const itemHeight = activeItem.offsetHeight;
+                
+                const targetScrollTop = itemTop - (containerHeight / 2) + (itemHeight / 2);
+                
+                container.scrollTo({
+                    top: Math.max(0, targetScrollTop),
+                    behavior: 'smooth'
+                });
+            }
         }
 
         function updateRepeatUI() {
@@ -749,10 +749,16 @@
                 DOM.vinylDisc.classList.remove('paused-spin');
                 DOM.vinylDisc.classList.add('animate-spin-slow');
                 DOM.neonRing.classList.add('playing');
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'playing';
+                }
             } else {
                 DOM.playPauseIcon.className = 'fas fa-play text-base ml-0.5';
                 DOM.vinylDisc.classList.add('paused-spin');
                 DOM.neonRing.classList.remove('playing');
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'paused';
+                }
             }
             updatePlaylistUI(); 
             updateMediaSession();
@@ -772,13 +778,14 @@
             updatePlayPauseUI();
         }
 
-        function parseMetadata(fileOrBlob) {
+        // --- Metadata Parsing ---
+        function parseMetadata(file) {
             if (!window.jsmediatags) {
                 DOM.lyricsContent.innerHTML = '<p class="text-gray-500">메타데이터 파서를 불러올 수 없습니다.</p>';
                 return;
             }
             
-            window.jsmediatags.read(fileOrBlob, {
+            window.jsmediatags.read(file, {
                 onSuccess: function(tag) {
                     const tags = tag.tags;
                     
@@ -888,6 +895,7 @@
             }
         }
 
+        // --- Core Audio Logic ---
         function loadTrack(index, autoPlay = true, seekTime = 0) {
             if (index < 0 || index >= state.playlist.length) return;
             
@@ -898,22 +906,7 @@
             
             if (state.audio.src) URL.revokeObjectURL(state.audio.src);
             
-            // ArrayBuffer 데이터가 있는 경우 Blob으로 변환하여 오디오 소스 생성 (크롬 PWA 재접속 안전 보장)
-            let audioBlob;
-            if (track.buffer) {
-                audioBlob = new Blob([track.buffer], { type: track.type || 'audio/mpeg' });
-            } else if (track.file) {
-                audioBlob = track.file;
-            }
-
-            if (!audioBlob) {
-                DOM.songTitle.textContent = formatFileName(track.name);
-                DOM.songArtist.textContent = "오디오 데이터 없음";
-                showToast("음악 데이터를 읽을 수 없습니다");
-                return;
-            }
-
-            const objectUrl = URL.createObjectURL(audioBlob);
+            const objectUrl = URL.createObjectURL(track.file);
             state.audio.src = objectUrl;
             state.audio.load();
             
@@ -925,7 +918,7 @@
             state.parsedLyrics = [];
             state.lastLyricIndex = -1;
             
-            parseMetadata(audioBlob);
+            parseMetadata(track.file);
             DOM.progressBar.disabled = false;
             updatePlaylistUI();
             
@@ -934,47 +927,22 @@
 
         function playTrack(index = null) {
             if (state.playlist.length === 0) return;
-            if (index !== null && index !== state.currentIndex) {
-                loadTrack(index, true);
-                return;
-            } else if (state.currentIndex === -1) {
-                loadTrack(0, true);
-                return;
-            }
+            if (index !== null && index !== state.currentIndex) loadTrack(index, false);
+            else if (state.currentIndex === -1) loadTrack(0, false);
             
-            state.userInitiatedPause = false;
-            startSilentKeepAlive();
-
-            // PWA 재생 정책 차단 해제를 위해 AudioContext 활성화
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-
-            const playPromise = state.audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    state.isPlaying = true;
-                    updatePlayPauseUI();
-                }).catch((err) => {
-                    console.warn("Playback prevented, retrying with silent keepalive:", err);
-                    // PWA 오디오 인터랙션 제한 우회를 위한 재시도
-                    setTimeout(() => {
-                        state.audio.play().then(() => {
-                            state.isPlaying = true;
-                            updatePlayPauseUI();
-                        }).catch(e => {
-                            state.isPlaying = false;
-                            updatePlayPauseUI();
-                        });
-                    }, 100);
-                });
-            }
+            state.audio.play().then(() => {
+                state.isPlaying = true;
+                updatePlayPauseUI();
+            }).catch((err) => {
+                console.warn("Playback prevented:", err);
+                state.isPlaying = false;
+                updatePlayPauseUI();
+            });
         }
 
         function pauseTrack() {
             state.audio.pause();
             state.isPlaying = false;
-            stopSilentKeepAlive();
             saveSettings();
             updatePlayPauseUI();
         }
@@ -984,18 +952,12 @@
                 showToast("음악을 먼저 추가해주세요");
                 return;
             }
-            if (state.isPlaying) {
-                state.userInitiatedPause = true;
-                pauseTrack();
-            } else {
-                state.userInitiatedPause = false;
-                playTrack();
-            }
+            if (state.isPlaying) pauseTrack();
+            else playTrack();
         }
 
         function nextTrack() {
             if (state.playlist.length === 0) return;
-            state.userInitiatedPause = false;
             if (state.isShuffle) {
                 let nextIdx = state.currentIndex;
                 while (nextIdx === state.currentIndex && state.playlist.length > 1) {
@@ -1010,7 +972,6 @@
 
         function prevTrack() {
             if (state.playlist.length === 0) return;
-            state.userInitiatedPause = false;
             if (state.audio.currentTime > 3) {
                 state.audio.currentTime = 0;
             } else {
@@ -1042,43 +1003,8 @@
             updatePlaylistUI();
         }
 
+        // --- Event Listeners ---
         let lastSavedSec = -1;
-
-        state.audio.addEventListener('play', () => {
-            state.isPlaying = true;
-            state.wasInterruptedBySystem = false;
-            updatePlayPauseUI();
-        });
-
-        state.audio.addEventListener('pause', () => {
-            if (!state.userInitiatedPause && state.isPlaying) {
-                state.wasInterruptedBySystem = true;
-                state.isPlaying = false;
-                updatePlayPauseUI();
-            } else if (state.userInitiatedPause) {
-                state.isPlaying = false;
-                updatePlayPauseUI();
-            }
-        });
-
-        function handleAudioInterruptionResume() {
-            if (state.wasInterruptedBySystem && !state.userInitiatedPause && state.currentIndex >= 0) {
-                state.audio.play().then(() => {
-                    state.isPlaying = true;
-                    state.wasInterruptedBySystem = false;
-                    updatePlayPauseUI();
-                    showToast("오디오 재생 재개됨");
-                }).catch((e) => {
-                    console.log("자동 재개 대기 중:", e);
-                });
-            }
-        }
-
-        if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
-            navigator.mediaDevices.addEventListener('devicechange', () => {
-                setTimeout(handleAudioInterruptionResume, 1000);
-            });
-        }
 
         state.audio.addEventListener('loadedmetadata', () => {
             DOM.totalTime.textContent = formatTime(state.audio.duration);
@@ -1110,9 +1036,7 @@
             updateLyricsHighlight(state.audio.currentTime);
         });
 
-        // PWA 자동 연속 재생 버그의 핵심 수정 위치
         state.audio.addEventListener('ended', () => {
-            state.userInitiatedPause = false;
             if (state.repeatMode === 2) {
                 state.audio.currentTime = 0;
                 playTrack(state.currentIndex);
@@ -1120,10 +1044,7 @@
                 pauseTrack();
                 state.audio.currentTime = 0;
             } else {
-                // 백그라운드 PWA Autoplay 방어: 즉시 nextTrack 호출
-                setTimeout(() => {
-                    nextTrack();
-                }, 50);
+                nextTrack();
             }
         });
 
@@ -1193,18 +1114,11 @@
             if (files.length === 0) return;
 
             const wasEmpty = state.playlist.length === 0;
-            const newTracks = [];
-
-            for (const file of files) {
-                const buffer = await file.arrayBuffer();
-                newTracks.push({
-                    id: Date.now() + '_' + Math.random().toString(36).substring(2, 9) + '_' + file.name,
-                    name: file.name,
-                    type: file.type || 'audio/mpeg',
-                    buffer: buffer,
-                    file: file
-                });
-            }
+            const newTracks = files.map(file => ({
+                id: Date.now() + '_' + Math.random().toString(36).substring(2, 9) + '_' + file.name,
+                name: file.name,
+                file: file
+            }));
 
             state.playlist = [...state.playlist, ...newTracks];
             
@@ -1245,7 +1159,8 @@
                 setTimeout(() => {
                     DOM.playlistBackdrop.classList.remove('opacity-0');
                     DOM.playlistBackdrop.classList.add('opacity-100');
-                }, 10);
+                    scrollToCurrentTrack();
+                }, 150);
             }
         }
 
@@ -1278,41 +1193,52 @@
 
         DOM.btnClearPlaylistBtn.addEventListener('click', showConfirmModal);
         DOM.btnCancelClear.addEventListener('click', hideConfirmModal);
-
+        
         DOM.btnConfirmClear.addEventListener('click', async () => {
-            pauseTrack();
+            hideConfirmModal();
             state.playlist = [];
-            state.currentIndex = -1;
             await clearTracksDB();
+            
+            pauseTrack();
+            state.audio.src = '';
+            state.currentIndex = -1;
             saveSettings();
             resetUI();
             updatePlaylistUI();
-            hideConfirmModal();
-            showToast("플레이리스트를 비웠습니다");
+            showToast("플레이리스트가 초기화되었습니다");
         });
 
+        // App Initialization
         window.addEventListener('DOMContentLoaded', async () => {
             initMediaSession();
-            loadSettings();
-
             try {
+                loadSettings();
                 const storedTracks = await loadTracksFromDB();
+                
                 if (storedTracks && storedTracks.length > 0) {
                     state.playlist = storedTracks;
                     updatePlaylistUI();
-
+                    
                     if (state.currentIndex >= 0 && state.currentIndex < state.playlist.length) {
-                        loadTrack(state.currentIndex, false, state.pendingSeekTime);
-                    } else if (state.playlist.length > 0) {
-                        loadTrack(0, false, 0);
+                        const savedTime = state.pendingSeekTime;
+                        loadTrack(state.currentIndex, false, savedTime);
+                        DOM.songArtist.textContent = "Offline Library (재개 대기중)";
+                    } else {
+                        state.currentIndex = -1;
+                        resetUI();
                     }
                 } else {
                     updatePlaylistUI();
                 }
-            } catch (err) {
-                console.error("Failed to load tracks from IndexedDB:", err);
-                updatePlaylistUI();
+            } catch (error) {
+                console.error("Initialization error:", error);
+                DOM.loadingIndicator.innerHTML = '<p class="text-rose-400 text-xs">데이터를 불러오는데 실패했습니다.</p>';
             }
+        });
+
+        window.addEventListener('beforeunload', saveSettings);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') saveSettings();
         });
     </script>
 </body>
