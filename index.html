@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#070913">
-    
-    <!-- Fullscreen & PWA display options for mobile browsers (Samsung Internet, Chrome, Safari) -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="TeD music">
-    <meta name="display" content="fullscreen">
     
     <!-- Neon Gradient App Icon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2306b6d4'/><stop offset='50%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient></defs><rect width='512' height='512' rx='120' fill='%23070913'/><rect x='16' y='16' width='480' height='480' rx='108' fill='url(%23bg)' opacity='0.15'/><path d='M192 144 L368 256 L192 368 Z' fill='url(%23bg)'/><circle cx='380' cy='140' r='12' fill='%2322d3ee'/><circle cx='130' cy='370' r='16' fill='%23e879f9'/></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2306b6d4'/><stop offset='50%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient></defs><rect width='512' height='512' rx='120' fill='%23070913'/><rect x='16' y='16' width='480' height='480' rx='108' fill='url(%23bg)' opacity='0.15'/><path d='M192 144 L368 256 L192 368 Z' fill='url(%23bg)'/><circle cx='380' cy='140' r='12' fill='%2322d3ee'/><circle cx='130' cy='370' r='16' fill='%23e879f9'/></svg>">
-    <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22TeD%20music%22,%22short_name%22:%22TeD%20music%22,%22start_url%22:%22./%22,%22display%22:%22fullscreen%22,%22orientation%22:%22portrait%22,%22background_color%22:%22%23070913%22,%22theme_color%22:%22%23070913%22}">
+    <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22TeD%20music%22,%22short_name%22:%22TeD%20music%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%23070913%22,%22theme_color%22:%22%23070913%22}">
     
     <title>TeD music v1.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,20 +28,22 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: pan-y;
             user-select: none;
             -webkit-user-select: none;
         }
 
         body {
-            position: relative;
-            width: 100%;
-            height: 100dvh; /* Dynamic viewport height to fill available screen perfectly */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 100vh;
+            height: 100dvh;
         }
 
-        /* Custom Styles for Slider */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
@@ -71,7 +70,6 @@
             outline: none;
         }
         
-        /* Disc Animation & Neon Ring */
         @keyframes spin-slow {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -94,7 +92,6 @@
             box-shadow: 0 0 40px rgba(6, 182, 212, 0.6), 0 0 70px rgba(236, 72, 153, 0.5);
         }
 
-        /* Playlist Overlay Transition (Right to Left Slide) */
         .playlist-open {
             transform: translateX(0%);
         }
@@ -102,7 +99,6 @@
             transform: translateX(100%);
         }
 
-        /* Hide scrollbar */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -116,7 +112,6 @@
             mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
         }
 
-        /* Lyrics Highlight Styles */
         .lyric-line { 
             transition: all 0.3s ease; 
             transform-origin: center;
@@ -131,11 +126,9 @@
 </head>
 <body class="font-sans h-full w-full overflow-hidden flex flex-col justify-between relative bg-[#070913] max-w-[440px] mx-auto border-x border-white/5">
 
-    <!-- Ambient Glow Background Blur -->
     <div class="absolute -top-24 -left-24 w-72 h-72 bg-cyan-600/20 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-fuchsia-600/20 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- Top Bar Header -->
     <header class="flex justify-between items-center px-6 py-2 bg-transparent z-10 w-full flex-shrink-0 pt-[calc(0.5rem+env(safe-area-inset-top))]">
         <div class="flex items-center gap-3">
             <button id="btnLoadMusic" class="text-gray-300 hover:text-white transition-all p-2 rounded-full backdrop-blur-md bg-white/5 border border-white/10 hover:border-cyan-500/50" title="음악 추가">
@@ -152,20 +145,15 @@
         </button>
     </header>
 
-    <!-- Hidden File Input -->
     <input type="file" id="fileInput" multiple accept="audio/*" class="hidden">
 
-    <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col items-center justify-between px-6 w-full min-h-0 relative z-10 overflow-hidden py-1">
+    <main class="flex-1 flex flex-col items-center justify-evenly px-6 w-full min-h-0 relative z-10 overflow-hidden py-1">
         
-        <!-- Visual Area (Vinyl + Gradient Neon Ring) -->
-        <div class="relative w-full flex-1 max-h-[260px] sm:max-h-[300px] flex items-center justify-center my-auto">
-            <div id="neonRing" class="neon-ring-outer w-full max-w-[170px] sm:max-w-[190px] aspect-square">
+        <div class="relative w-full flex-1 max-h-[320px] flex items-center justify-center my-auto">
+            <div id="neonRing" class="neon-ring-outer w-full max-w-[190px] aspect-square">
                 <div class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center p-1 border border-white/10 cursor-pointer shadow-2xl relative" id="discContainer">
                     <div id="vinylDisc" class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center paused-spin relative overflow-hidden">
-                        <!-- Album Cover Image -->
                         <img id="albumCover" src="" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 z-10" alt="Album Cover" style="display: none;">
-                        <!-- Default Vinyl Grooves -->
                         <div class="w-full h-full rounded-full border border-white/5 flex items-center justify-center">
                             <div class="w-3/4 h-3/4 rounded-full border border-white/5 flex items-center justify-center">
                                 <div class="w-1/2 h-1/2 rounded-full border border-white/10 bg-cyan-500/10 flex items-center justify-center">
@@ -177,7 +165,6 @@
                 </div>
             </div>
 
-            <!-- Rectangular Lyrics Overlay -->
             <div id="inlineLyricsView" class="absolute inset-0 w-full h-full bg-slate-950/40 backdrop-blur-xs rounded-3xl z-30 flex flex-col hidden opacity-0 transition-opacity duration-300 overflow-hidden shadow-2xl border border-white/20 cursor-pointer">
                 <div id="lyricsScroll" class="w-full h-full overflow-y-auto no-scrollbar relative px-4 mask-image-y pointer-events-auto">
                     <div id="lyricsContent" class="text-center text-gray-200 text-sm sm:text-base py-[110px] relative font-medium">
@@ -187,27 +174,21 @@
             </div>
         </div>
 
-        <!-- Song Info & Progress Area Container -->
-        <div class="w-full flex-shrink-0 flex flex-col gap-2 my-auto">
-            <!-- Song Info -->
-            <div class="text-center w-full">
-                <h2 id="songTitle" class="text-base sm:text-lg font-bold truncate mb-0.5 text-white tracking-wide">음악을 선택해주세요</h2>
-                <p id="songArtist" class="text-gray-400 text-[11px] sm:text-xs font-medium">기기의 폴더에서 노래를 불러오세요</p>
-            </div>
+        <div class="text-center w-full flex-shrink-0 my-1">
+            <h2 id="songTitle" class="text-base sm:text-lg font-bold truncate mb-0.5 text-white tracking-wide">음악을 선택해주세요</h2>
+            <p id="songArtist" class="text-gray-400 text-[11px] sm:text-xs font-medium">기기의 폴더에서 노래를 불러오세요</p>
+        </div>
 
-            <!-- Progress Bar -->
-            <div class="w-full px-2">
-                <input type="range" id="progressBar" min="0" value="0" step="0.1" class="w-full" disabled>
-                <div class="flex justify-between text-[10px] text-gray-400 mt-1 font-mono">
-                    <span id="currentTime">00:00</span>
-                    <span id="totalTime">00:00</span>
-                </div>
+        <div class="w-full flex-shrink-0 px-2 my-1">
+            <input type="range" id="progressBar" min="0" value="0" step="0.1" class="w-full" disabled>
+            <div class="flex justify-between text-[10px] text-gray-400 mt-1 font-mono">
+                <span id="currentTime">00:00</span>
+                <span id="totalTime">00:00</span>
             </div>
         </div>
     </main>
 
-    <!-- Controls Area (Always Visible at Bottom) -->
-    <div id="playerControls" class="flex justify-between items-center w-full px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-2 z-50 flex-shrink-0 bg-[#070913]">
+    <div id="playerControls" class="flex justify-between items-center w-full px-6 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 z-50 flex-shrink-0 bg-[#070913]">
         <button id="btnShuffle" class="text-gray-500 transition-colors p-2 focus:outline-none" title="셔플">
             <i class="fas fa-random text-sm"></i>
         </button>
@@ -226,7 +207,6 @@
         </button>
     </div>
 
-    <!-- Playlist Overlay -->
     <div id="playlistView" class="absolute inset-x-0 top-0 bottom-[80px] bg-slate-950/95 backdrop-blur-xl border-b border-white/10 rounded-b-3xl shadow-2xl z-40 transition-transform duration-300 ease-in-out playlist-closed flex flex-col pt-[calc(0.5rem+env(safe-area-inset-top))]">
         <div class="flex justify-between items-center px-5 py-3 border-b border-white/10 shrink-0">
             <h3 class="text-sm font-bold text-white">플레이리스트 (<span id="playlistCount" class="text-cyan-400">0</span>)</h3>
@@ -246,10 +226,8 @@
         </ul>
     </div>
 
-    <!-- Backdrop for playlist -->
     <div id="playlistBackdrop" class="absolute inset-0 bg-black/60 z-30 hidden transition-opacity opacity-0 backdrop-blur-sm pointer-events-none"></div>
 
-    <!-- Install Modal -->
     <div id="installModal" class="absolute inset-0 bg-black/80 z-50 hidden items-center justify-center backdrop-blur-sm opacity-0 transition-opacity">
         <div class="bg-slate-900 p-5 rounded-2xl w-[88%] max-w-xs text-center shadow-2xl border border-white/10 transform scale-95 transition-transform" id="installModalBox">
             <div class="w-12 h-12 mx-auto mb-2.5 rounded-2xl overflow-hidden shadow-lg border border-cyan-500/30 flex items-center justify-center bg-slate-950">
@@ -277,7 +255,6 @@
         </div>
     </div>
 
-    <!-- Custom Confirm Modal -->
     <div id="confirmModal" class="absolute inset-0 bg-black/80 z-50 hidden items-center justify-center backdrop-blur-sm opacity-0 transition-opacity">
         <div class="bg-slate-900 p-5 rounded-2xl w-[82%] max-w-xs text-center shadow-2xl border border-white/10 transform scale-95 transition-transform" id="confirmModalBox">
             <div class="text-rose-400 mb-2.5 text-2xl">
@@ -292,13 +269,11 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toastMsg" class="absolute top-14 left-1/2 transform -translate-x-1/2 bg-slate-800/90 backdrop-blur-md text-cyan-300 px-3.5 py-1.5 rounded-full shadow-xl z-50 transition-opacity opacity-0 pointer-events-none text-[11px] border border-cyan-500/30 text-center max-w-[85vw]">
         알림 메시지
     </div>
 
     <script>
-        // --- State Management ---
         const state = {
             playlist: [],
             currentIndex: -1,
@@ -311,7 +286,6 @@
             pendingSeekTime: 0
         };
 
-        // --- DOM Elements ---
         const DOM = {
             fileInput: document.getElementById('fileInput'),
             btnLoadMusic: document.getElementById('btnLoadMusic'),
@@ -419,7 +393,6 @@
             }
         });
 
-        // --- Touch Gestures ---
         let touchStartX = 0;
         let touchStartY = 0;
 
@@ -444,7 +417,6 @@
             }
         }, { passive: true });
 
-        // --- Media Session API ---
         function initMediaSession() {
             if (!('mediaSession' in navigator)) return;
 
@@ -529,7 +501,6 @@
             }
         }
 
-        // --- IndexedDB Persistence ---
         const DB_NAME = 'TeDMusicPlayerDB';
         const DB_VERSION = 1;
         const STORE_NAME = 'playlist_tracks';
@@ -587,7 +558,6 @@
             });
         }
 
-        // --- Settings Management ---
         function saveSettings() {
             const settings = {
                 currentIndex: state.currentIndex,
@@ -644,7 +614,6 @@
             return filename.replace(/\.[^/.]+$/, "");
         }
 
-        // --- UI Updates ---
         function updatePlaylistUI() {
             DOM.playlistCount.textContent = state.playlist.length;
             
@@ -705,7 +674,6 @@
             });
         }
 
-        // --- Scroll to Current Active Song in Playlist ---
         function scrollToCurrentTrack() {
             if (state.currentIndex < 0 || state.playlist.length === 0) return;
             
@@ -777,7 +745,6 @@
             updatePlayPauseUI();
         }
 
-        // --- Metadata Parsing ---
         function parseMetadata(file) {
             if (!window.jsmediatags) {
                 DOM.lyricsContent.innerHTML = '<p class="text-gray-500">메타데이터 파서를 불러올 수 없습니다.</p>';
@@ -894,7 +861,6 @@
             }
         }
 
-        // --- Core Audio Logic ---
         function loadTrack(index, autoPlay = true, seekTime = 0) {
             if (index < 0 || index >= state.playlist.length) return;
             
@@ -926,17 +892,22 @@
 
         function playTrack(index = null) {
             if (state.playlist.length === 0) return;
-            if (index !== null && index !== state.currentIndex) loadTrack(index, false);
-            else if (state.currentIndex === -1) loadTrack(0, false);
+            if (index !== null && index !== state.currentIndex) {
+                loadTrack(index, false);
+            } else if (state.currentIndex === -1) {
+                loadTrack(0, false);
+            }
             
-            state.audio.play().then(() => {
-                state.isPlaying = true;
-                updatePlayPauseUI();
-            }).catch((err) => {
-                console.warn("Playback prevented:", err);
-                state.isPlaying = false;
-                updatePlayPauseUI();
-            });
+            setTimeout(() => {
+                state.audio.play().then(() => {
+                    state.isPlaying = true;
+                    updatePlayPauseUI();
+                }).catch((err) => {
+                    console.warn("Playback prevented:", err);
+                    state.isPlaying = false;
+                    updatePlayPauseUI();
+                });
+            }, 50);
         }
 
         function pauseTrack() {
@@ -1002,7 +973,6 @@
             updatePlaylistUI();
         }
 
-        // --- Event Listeners ---
         let lastSavedSec = -1;
 
         state.audio.addEventListener('loadedmetadata', () => {
@@ -1036,15 +1006,17 @@
         });
 
         state.audio.addEventListener('ended', () => {
-            if (state.repeatMode === 2) {
-                state.audio.currentTime = 0;
-                playTrack(state.currentIndex);
-            } else if (state.repeatMode === 0 && state.currentIndex === state.playlist.length - 1 && !state.isShuffle) {
-                pauseTrack();
-                state.audio.currentTime = 0;
-            } else {
-                nextTrack();
-            }
+            setTimeout(() => {
+                if (state.repeatMode === 2) {
+                    state.audio.currentTime = 0;
+                    playTrack(state.currentIndex);
+                } else if (state.repeatMode === 0 && state.currentIndex === state.playlist.length - 1 && !state.isShuffle) {
+                    pauseTrack();
+                    state.audio.currentTime = 0;
+                } else {
+                    nextTrack();
+                }
+            }, 100);
         });
 
         DOM.progressBar.addEventListener('input', () => {
@@ -1207,10 +1179,8 @@
             showToast("플레이리스트가 초기화되었습니다");
         });
 
-        // App Initialization
         window.addEventListener('DOMContentLoaded', async () => {
             initMediaSession();
-
             try {
                 loadSettings();
                 const storedTracks = await loadTracksFromDB();
