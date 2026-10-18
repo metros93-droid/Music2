@@ -416,17 +416,21 @@
         let touchStartY = 0;
 
         document.body.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
+            touchStartX = e.changedTouches[0].clientX;
+            touchStartY = e.changedTouches[0].clientY;
         }, { passive: true });
 
         document.body.addEventListener('touchend', (e) => {
-            const touchEndX = e.changedTouches[0].screenX;
-            const touchEndY = e.changedTouches[0].screenY;
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
             const diffX = touchEndX - touchStartX;
             const diffY = touchEndY - touchStartY;
 
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+            const edgeThreshold = 30;
+            const windowWidth = window.innerWidth;
+            const isEdgeSwipe = touchStartX < edgeThreshold || touchStartX > (windowWidth - edgeThreshold);
+
+            if (!isEdgeSwipe && Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
                 const isPlaylistOpen = DOM.playlistView.classList.contains('playlist-open');
                 if (diffX < 0 && !isPlaylistOpen) {
                     togglePlaylist(true);
@@ -435,6 +439,14 @@
                 }
             }
         }, { passive: true });
+
+        let isPlaylistHistoryPushed = false;
+
+        window.addEventListener('popstate', (e) => {
+            if (DOM.playlistView.classList.contains('playlist-open')) {
+                togglePlaylist(false, false);
+            }
+        });
 
         function initMediaSession() {
             if (!('mediaSession' in navigator)) return;
@@ -1123,7 +1135,7 @@
             DOM.fileInput.value = '';
         });
 
-        function togglePlaylist(forceState) {
+        function togglePlaylist(forceState, updateHistory = true) {
             const isOpen = DOM.playlistView.classList.contains('playlist-open');
             const shouldOpen = forceState !== undefined ? forceState : !isOpen;
 
@@ -1135,6 +1147,11 @@
                     DOM.playlistBackdrop.classList.remove('opacity-100');
                     DOM.playlistBackdrop.classList.add('opacity-0');
                 }, 10);
+
+                if (isPlaylistHistoryPushed && updateHistory) {
+                    isPlaylistHistoryPushed = false;
+                    history.back();
+                }
             } else {
                 DOM.playlistView.classList.remove('playlist-closed');
                 DOM.playlistView.classList.add('playlist-open');
@@ -1144,6 +1161,11 @@
                     DOM.playlistBackdrop.classList.add('opacity-100');
                     scrollToCurrentTrack();
                 }, 150);
+
+                if (!isPlaylistHistoryPushed && updateHistory) {
+                    isPlaylistHistoryPushed = true;
+                    history.pushState({ playlistOpen: true }, '');
+                }
             }
         }
 
