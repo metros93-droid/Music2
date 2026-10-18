@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2306b6d4'/><stop offset='50%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient></defs><rect width='512' height='512' rx='120' fill='%23070913'/><rect x='16' y='16' width='480' height='480' rx='108' fill='url(%23bg)' opacity='0.15'/><path d='M192 144 L368 256 L192 368 Z' fill='url(%23bg)'/><circle cx='380' cy='140' r='12' fill='%2322d3ee'/><circle cx='130' cy='370' r='16' fill='%23e879f9'/></svg>">
     <link rel="manifest" href="manifest.json">
     
-    <title>TeD music v1.0</title>
+    <title>TeD music v1.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -139,7 +139,7 @@
                 <i class="fas fa-mobile-screen-button text-base"></i>
             </button>
         </div>
-        <span class="text-[12px] font-bold tracking-wider text-cyan-400/90 normal-case">TeD music v1.0</span>
+        <span class="text-[12px] font-bold tracking-wider text-cyan-400/90 normal-case">TeD music v1.5</span>
         <button id="btnTogglePlaylist" class="text-gray-300 hover:text-white transition-all p-2 rounded-full backdrop-blur-md bg-white/5 border border-white/10 hover:border-cyan-500/50 relative">
             <i class="fas fa-list-ul text-base"></i>
             <span id="playlistBadge" class="absolute -top-1 -right-1 bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold hidden shadow-lg shadow-cyan-500/50">0</span>
@@ -346,19 +346,6 @@
             
             toastMsg: document.getElementById('toastMsg')
         };
-
-        function requestGlobalFullscreen() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                const docEl = document.documentElement;
-                const requestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
-                if (requestFS) {
-                    requestFS.call(docEl).catch(err => console.warn("Fullscreen error:", err));
-                }
-            }
-        }
-
-        window.addEventListener('click', requestGlobalFullscreen, { once: true });
-        window.addEventListener('touchstart', requestGlobalFullscreen, { once: true });
 
         let deferredPrompt = null;
 
@@ -1236,7 +1223,7 @@
                 }
             } catch (error) {
                 console.error("Initialization error:", error);
-                DOM.loadingIndicator.innerHTML = '<p class="text-rose-400 text-xs">데이터를 불러오는데 실패했습니다.</p>';
+                DOM.loadingIndicator.innerHTML = '<p class="text-rose-400 text-xs">데이터를 불러오는 데 실패했습니다.</p>';
             }
         });
 
