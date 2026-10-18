@@ -12,7 +12,7 @@
     <!-- Neon Gradient App Icon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2306b6d4'/><stop offset='50%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient></defs><rect width='512' height='512' rx='120' fill='%23070913'/><rect x='16' y='16' width='480' height='480' rx='108' fill='url(%23bg)' opacity='0.15'/><path d='M192 144 L368 256 L192 368 Z' fill='url(%23bg)'/><circle cx='380' cy='140' r='12' fill='%2322d3ee'/><circle cx='130' cy='370' r='16' fill='%23e879f9'/></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2306b6d4'/><stop offset='50%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient></defs><rect width='512' height='512' rx='120' fill='%23070913'/><rect x='16' y='16' width='480' height='480' rx='108' fill='url(%23bg)' opacity='0.15'/><path d='M192 144 L368 256 L192 368 Z' fill='url(%23bg)'/><circle cx='380' cy='140' r='12' fill='%2322d3ee'/><circle cx='130' cy='370' r='16' fill='%23e879f9'/></svg>">
-    <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22TeD%20music%22,%22short_name%22:%22TeD%20music%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%23070913%22,%22theme_color%22:%22%23070913%22}">
+    <link rel="manifest" href="manifest.json">
     
     <title>TeD music v1.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -129,8 +129,9 @@
     <div class="absolute -top-24 -left-24 w-72 h-72 bg-cyan-600/20 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-fuchsia-600/20 rounded-full blur-3xl pointer-events-none"></div>
 
+    <!-- Top Bar Header -->
     <header class="flex justify-between items-center px-6 py-2 bg-transparent z-10 w-full flex-shrink-0 pt-[calc(0.5rem+env(safe-area-inset-top))]">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
             <button id="btnLoadMusic" class="text-gray-300 hover:text-white transition-all p-2 rounded-full backdrop-blur-md bg-white/5 border border-white/10 hover:border-cyan-500/50" title="음악 추가">
                 <i class="fas fa-folder-plus text-base"></i>
             </button>
@@ -147,6 +148,7 @@
 
     <input type="file" id="fileInput" multiple accept="audio/*" class="hidden">
 
+    <!-- Main Content Area -->
     <main class="flex-1 flex flex-col items-center justify-evenly px-6 w-full min-h-0 relative z-10 overflow-hidden py-1">
         
         <div class="relative w-full flex-1 max-h-[320px] flex items-center justify-center my-auto">
@@ -188,6 +190,7 @@
         </div>
     </main>
 
+    <!-- Controls Area -->
     <div id="playerControls" class="flex justify-between items-center w-full px-6 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 z-50 flex-shrink-0 bg-[#070913]">
         <button id="btnShuffle" class="text-gray-500 transition-colors p-2 focus:outline-none" title="셔플">
             <i class="fas fa-random text-sm"></i>
@@ -207,6 +210,7 @@
         </button>
     </div>
 
+    <!-- Playlist Overlay -->
     <div id="playlistView" class="absolute inset-x-0 top-0 bottom-[80px] bg-slate-950/95 backdrop-blur-xl border-b border-white/10 rounded-b-3xl shadow-2xl z-40 transition-transform duration-300 ease-in-out playlist-closed flex flex-col pt-[calc(0.5rem+env(safe-area-inset-top))]">
         <div class="flex justify-between items-center px-5 py-3 border-b border-white/10 shrink-0">
             <h3 class="text-sm font-bold text-white">플레이리스트 (<span id="playlistCount" class="text-cyan-400">0</span>)</h3>
@@ -228,6 +232,7 @@
 
     <div id="playlistBackdrop" class="absolute inset-0 bg-black/60 z-30 hidden transition-opacity opacity-0 backdrop-blur-sm pointer-events-none"></div>
 
+    <!-- Install Modal -->
     <div id="installModal" class="absolute inset-0 bg-black/80 z-50 hidden items-center justify-center backdrop-blur-sm opacity-0 transition-opacity">
         <div class="bg-slate-900 p-5 rounded-2xl w-[88%] max-w-xs text-center shadow-2xl border border-white/10 transform scale-95 transition-transform" id="installModalBox">
             <div class="w-12 h-12 mx-auto mb-2.5 rounded-2xl overflow-hidden shadow-lg border border-cyan-500/30 flex items-center justify-center bg-slate-950">
@@ -242,12 +247,16 @@
 
             <div class="text-left bg-slate-950/70 p-2.5 rounded-xl text-[10px] text-gray-300 space-y-1.5 border border-white/5 mb-3">
                 <div>
+                    <p class="font-semibold text-cyan-400"><i class="fab fa-android mr-1"></i> 삼성 브라우저:</p>
+                    <p class="text-gray-300">하단 메뉴 <i class="fas fa-bars text-cyan-400"></i> 클릭 후 <strong class="text-white">'현재 페이지 추가'</strong> $\rightarrow$ <strong class="text-white">'홈 화면'</strong> 선택</p>
+                </div>
+                <div class="border-t border-white/10 pt-1">
                     <p class="font-semibold text-cyan-400"><i class="fab fa-apple mr-1"></i> iOS (Safari):</p>
                     <p class="text-gray-300">하단 <i class="fas fa-share-from-square text-cyan-400"></i> 공유 버튼 누른 후 <strong class="text-white">'홈 화면에 추가'</strong></p>
                 </div>
                 <div class="border-t border-white/10 pt-1">
-                    <p class="font-semibold text-cyan-400"><i class="fab fa-android mr-1"></i> Android (Chrome):</p>
-                    <p class="text-gray-300">우측 상단 메뉴 <i class="fas fa-ellipsis-vertical text-cyan-400"></i> 누른 후 <strong class="text-white">'앱 설치'</strong> 선택</p>
+                    <p class="font-semibold text-cyan-400"><i class="fab fa-chrome mr-1"></i> Chrome:</p>
+                    <p class="text-gray-300">상단 메뉴 <i class="fas fa-ellipsis-vertical text-cyan-400"></i> 누른 후 <strong class="text-white">'앱 설치'</strong> 선택</p>
                 </div>
             </div>
 
@@ -255,6 +264,7 @@
         </div>
     </div>
 
+    <!-- Custom Confirm Modal -->
     <div id="confirmModal" class="absolute inset-0 bg-black/80 z-50 hidden items-center justify-center backdrop-blur-sm opacity-0 transition-opacity">
         <div class="bg-slate-900 p-5 rounded-2xl w-[82%] max-w-xs text-center shadow-2xl border border-white/10 transform scale-95 transition-transform" id="confirmModalBox">
             <div class="text-rose-400 mb-2.5 text-2xl">
@@ -269,6 +279,7 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
     <div id="toastMsg" class="absolute top-14 left-1/2 transform -translate-x-1/2 bg-slate-800/90 backdrop-blur-md text-cyan-300 px-3.5 py-1.5 rounded-full shadow-xl z-50 transition-opacity opacity-0 pointer-events-none text-[11px] border border-cyan-500/30 text-center max-w-[85vw]">
         알림 메시지
     </div>
@@ -336,19 +347,27 @@
             toastMsg: document.getElementById('toastMsg')
         };
 
+        function requestGlobalFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                const docEl = document.documentElement;
+                const requestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
+                if (requestFS) {
+                    requestFS.call(docEl).catch(err => console.warn("Fullscreen error:", err));
+                }
+            }
+        }
+
+        window.addEventListener('click', requestGlobalFullscreen, { once: true });
+        window.addEventListener('touchstart', requestGlobalFullscreen, { once: true });
+
         let deferredPrompt = null;
 
         if ('serviceWorker' in navigator) {
-            const swCode = `
-                self.addEventListener('install', (e) => self.skipWaiting());
-                self.addEventListener('activate', (e) => self.clients.claim());
-                self.addEventListener('fetch', (e) => {
-                    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-                });
-            `;
-            const blob = new Blob([swCode], { type: 'text/javascript' });
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl).catch(err => console.log('SW Registration:', err));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW Registered:', reg))
+                    .catch(err => console.warn('SW Registration failed:', err));
+            });
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -892,22 +911,17 @@
 
         function playTrack(index = null) {
             if (state.playlist.length === 0) return;
-            if (index !== null && index !== state.currentIndex) {
-                loadTrack(index, false);
-            } else if (state.currentIndex === -1) {
-                loadTrack(0, false);
-            }
+            if (index !== null && index !== state.currentIndex) loadTrack(index, false);
+            else if (state.currentIndex === -1) loadTrack(0, false);
             
-            setTimeout(() => {
-                state.audio.play().then(() => {
-                    state.isPlaying = true;
-                    updatePlayPauseUI();
-                }).catch((err) => {
-                    console.warn("Playback prevented:", err);
-                    state.isPlaying = false;
-                    updatePlayPauseUI();
-                });
-            }, 50);
+            state.audio.play().then(() => {
+                state.isPlaying = true;
+                updatePlayPauseUI();
+            }).catch((err) => {
+                console.warn("Playback prevented:", err);
+                state.isPlaying = false;
+                updatePlayPauseUI();
+            });
         }
 
         function pauseTrack() {
@@ -1006,17 +1020,15 @@
         });
 
         state.audio.addEventListener('ended', () => {
-            setTimeout(() => {
-                if (state.repeatMode === 2) {
-                    state.audio.currentTime = 0;
-                    playTrack(state.currentIndex);
-                } else if (state.repeatMode === 0 && state.currentIndex === state.playlist.length - 1 && !state.isShuffle) {
-                    pauseTrack();
-                    state.audio.currentTime = 0;
-                } else {
-                    nextTrack();
-                }
-            }, 100);
+            if (state.repeatMode === 2) {
+                state.audio.currentTime = 0;
+                playTrack(state.currentIndex);
+            } else if (state.repeatMode === 0 && state.currentIndex === state.playlist.length - 1 && !state.isShuffle) {
+                pauseTrack();
+                state.audio.currentTime = 0;
+            } else {
+                nextTrack();
+            }
         });
 
         DOM.progressBar.addEventListener('input', () => {
