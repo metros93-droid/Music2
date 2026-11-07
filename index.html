@@ -640,7 +640,7 @@
                     state.isShuffle = parsed.isShuffle || false;
                     state.repeatMode = parsed.repeatMode || 0;
                     state.pendingSeekTime = parsed.currentTime || 0;
-                    state.sortBy = (parsed.sortBy && parsed.sortBy !== 'custom' && parsed.sortBy !== 'date-desc' && parsed.sortBy !== 'date-asc') ? parsed.sortBy : 'name-asc';
+                    state.sortBy = parsed.sortBy || 'name-asc';
                     if (DOM.sortOptionSelect) {
                         DOM.sortOptionSelect.value = state.sortBy;
                     }
@@ -698,7 +698,7 @@
 
         function sortPlaylist() {
             if (state.playlist.length === 0) return;
-            
+
             const activeId = state.currentTrackId || ((state.currentIndex >= 0 && state.playlist[state.currentIndex]) ? state.playlist[state.currentIndex].id : null);
 
             state.playlist.sort((a, b) => {
@@ -740,6 +740,8 @@
                 }
                 return 0;
             });
+            
+            // 정렬 후 바뀐 순서대로 DB 및 설정에 즉시 영구 저장
             saveTracksToDB(state.playlist);
 
             if (activeId) {
@@ -1187,6 +1189,7 @@
             } else if (index < state.currentIndex) {
                 state.currentIndex--;
             }
+            await saveTracksToDB(state.playlist);
             saveSettings();
             updatePlaylistUI();
         }
@@ -1257,20 +1260,22 @@
             showToast(state.isShuffle ? "셔플 켜짐" : "셔플 꺼짐");
         });
 
-        DOM.btnHeaderShuffle.addEventListener('click', () => {
+        DOM.btnHeaderShuffle.addEventListener('click', async () => {
             if (state.playlist.length <= 1) {
                 showToast("섞을 곡이 부족합니다");
                 return;
             }
             shuffleArray(state.playlist);
+            await saveTracksToDB(state.playlist);
             saveSettings();
             updatePlaylistUI();
             showToast("목록 무작위 섞기 완료");
         });
 
-        DOM.sortOptionSelect.addEventListener('change', (e) => {
+        DOM.sortOptionSelect.addEventListener('change', async (e) => {
             state.sortBy = e.target.value;
             sortPlaylist();
+            await saveTracksToDB(state.playlist);
             saveSettings();
             updatePlaylistUI();
             showToast("목록 정렬 완료");
@@ -1336,10 +1341,10 @@
             await Promise.all(newTracks.map(track => preFetchMetadata(track.file, track)));
 
             state.playlist = [...state.playlist, ...newTracks];
+            
             sortPlaylist();
             
             try {
-                await saveTracksToDB(state.playlist);
                 showToast(`${newTracks.length}곡 추가 완료`);
             } catch (err) {
                 showToast("저장소 저장 오류 발생");
@@ -1446,9 +1451,9 @@
                 const storedTracks = await loadTracksFromDB();
                 
                 if (storedTracks && storedTracks.length > 0) {
+                    // DB에 저장된 인덱스 order 순서 그대로 복원 (앱 켤 때 강제 재정렬 금지)
+                    storedTracks.sort((a, b) => (a.order !== undefined ? a.order : 0) - (b.order !== undefined ? b.order : 0));
                     state.playlist = storedTracks;
-                    
-                    sortPlaylist();
                     
                     if (state.currentTrackId) {
                         const targetIdx = state.playlist.findIndex(track => track.id === state.currentTrackId);
